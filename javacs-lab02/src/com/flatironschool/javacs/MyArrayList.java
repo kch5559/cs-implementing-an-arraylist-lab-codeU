@@ -33,16 +33,17 @@ public class MyArrayList<E> implements List<E> {
 	 * @param args
 	 */
 	public static void main(String[] args) {
+
+
 		// run a few simple tests
 		MyArrayList<Integer> mal = new MyArrayList<Integer>();
 		mal.add(1);
 		mal.add(2);
 		mal.add(3);
 		System.out.println(Arrays.toString(mal.toArray()) + " size = " + mal.size);
-		
 		mal.remove(new Integer(2));
 		System.out.println(Arrays.toString(mal.toArray()) + " size = " + mal.size);
-	}
+    }
 
 	@Override
 	public boolean add(E element) {
@@ -51,7 +52,8 @@ public class MyArrayList<E> implements List<E> {
 			E[] bigger = (E[]) new Object[array.length * 2];
 			System.arraycopy(array, 0, bigger, 0, array.length);
 			array = bigger;
-		} 
+		}
+
 		array[size] = element;
 		size++;
 		return true;
@@ -59,11 +61,39 @@ public class MyArrayList<E> implements List<E> {
 
 	@Override
 	public void add(int index, E element) {
-		if (index < 0 || index > size) {
+		if (index < 0 || index > size()+1) {
 			throw new IndexOutOfBoundsException();
 		}
-		// TODO: fill in the rest of this method
+
+        int futureSize = size+1;
+        //when adding new element needs more room.
+        if(futureSize >= array.length) {
+            E[] bigger = (E[]) new Object[array.length * 2];
+            System.arraycopy(array, 0, bigger, 0, array.length);
+            array = bigger;
+        }
+
+        //add to last
+        if(index == size()) {
+            add(element);
+            return;
+        }else {
+            makeRoom(index);
+            array[index] = element;
+            size++;
+        }
 	}
+
+
+    //move all elements behind the given index to make empty in given index.
+    private void makeRoom(int index) {
+
+        int lastElement = size-1;
+
+        for(int i = lastElement ; i >= index; i--) {
+            array[i+1] = array[i];
+        }
+    }
 
 	@Override
 	public boolean addAll(Collection<? extends E> collection) {
@@ -112,8 +142,31 @@ public class MyArrayList<E> implements List<E> {
 	@Override
 	public int indexOf(Object target) {
 		// TODO: fill in this method
-		return 0;
+        E myTarget = (E)target;
+        boolean targetNull = myTarget == null? true : false;
+    //    System.out.println();
+    //    printArray();
+        for(int i = 0; i < size; i++) {
+
+            if(targetNull) {
+                if(array[i] == null) return i;
+            }else {
+                if (array[i].equals(myTarget))
+                    return i;
+            }
+        }
+       // System.out.println();
+        //not found
+		return -1;
 	}
+
+    private void printArray() {
+        System.out.print("[");
+        for(int i = 0; i < size; i++) {
+            System.out.print(array[i] + ",");
+        }
+        System.out.println("]");
+    }
 
 	/** Checks whether an element of the array is the target.
 	 * 
@@ -182,9 +235,22 @@ public class MyArrayList<E> implements List<E> {
 
 	@Override
 	public E remove(int index) {
-		// TODO: fill in this method.
-		return null;
+        if (index < 0 || index >= size) {
+            throw new IndexOutOfBoundsException();
+        }
+        E result = array[index];
+        fillRoom(index);
+        size--;
+
+		return result;
 	}
+
+    private void fillRoom(int index) {
+
+        for(int i = index ; i < size;i++) {
+            array[i] = array[i+1];
+        }
+    }
 
 	@Override
 	public boolean removeAll(Collection<?> collection) {
@@ -202,8 +268,17 @@ public class MyArrayList<E> implements List<E> {
 
 	@Override
 	public E set(int index, E element) {
-		// TODO: fill in this method.
-		return null;
+
+        //out of arrayList
+        if (index < 0 || index >= size) {
+            throw new IndexOutOfBoundsException();
+        }
+
+        E previousElement = array[index];
+        array[index] = element;
+
+        return previousElement;
+
 	}
 
 	@Override
